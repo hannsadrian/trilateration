@@ -1,10 +1,12 @@
 import ReactMapboxGl, {Layer, Feature, Source} from 'react-mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import {useState} from "react";
+import {useState, useEffect} from "react";
+import trilateration from "node-trilateration";
+
 
 const Map = ReactMapboxGl({
     accessToken:
-        'pk.eyJ1IjoiYWR3aXJhd2llbiIsImEiOiJja243dHk0N3AwcmVlMm5ueDYwcWUzbzFlIn0.nfXmMAz7t9gjY64io_sbOg'
+        process.env.REACT_APP_MAPBOX_TOKEN
 });
 
 const metersToPixelsAtMaxZoom = (meters, latitude) => meters / 0.075 / Math.cos(latitude * Math.PI / 180)
@@ -21,7 +23,7 @@ function App() {
         })
         refresh()
         setTimeout(() =>
-        setAddMode(true), 100)
+            setAddMode(true), 100)
     }
 
     const reassignWayPoints = (newWayPoints, switchToEdit) => {
@@ -43,6 +45,40 @@ function App() {
             setEditMode(false)
             setAddMode(false)
         }, 50)
+    }
+
+    const calculate = () => {
+        if (wayPoints.length < 3)
+            return
+
+        let beacons = [];
+
+        wayPoints.forEach(wp => {
+            beacons.push({x: wp.lat, y: wp.lng, radius: wp.radius});
+        })
+
+        try {
+            let pos = trilateration.calculate(beacons);
+
+            console.log("X: " + pos.x + "; Y: " + pos.y);
+        } catch (ignore) {
+        }
+    }
+
+    const calculateTest = () => {
+
+        let beacons = [
+            {x: 2, y: 4, distance: 5.7},
+            {x: 5.5, y: 13, distance: 6.8},
+            {x: 11.5, y: 2, distance: 6.4}
+        ];
+
+        try {
+            let pos = trilateration.calculate(beacons);
+
+            console.log("X: " + pos.x + "; Y: " + pos.y);
+        } catch (ignore) {
+        }
     }
 
     return (
@@ -147,13 +183,14 @@ function App() {
                     🪂 Empty
                 </button>
             </div>
+            <button onClick={calculateTest}>calc</button>
             <div>
                 {wayPoints.map(wp =>
                     <div className="ml-4 flex">
                         <h3 className="font-bold text-2xl">{wp.index}</h3>
                         <div className="ml-2">
                             <p>{wp.lat}, {wp.lng}</p>
-                            <input type="range" min={1} max={300} onChange={event => {
+                            <input type="range" min={1} max={300} value={wp.radius} onChange={event => {
                                 setWayPoints(wps => {
                                     wps[wp.index - 1].radius = event.target.value;
                                     return wps;
