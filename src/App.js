@@ -57,7 +57,7 @@ function App() {
     let beacons = [];
 
     wayPoints.forEach((wp) => {
-      beacons.push({ v: new Vector(wp.lat, wp.lng), d: parseFloat(wp.radius) });
+      beacons.push({ v: new Vector(wp.lat, wp.lng), w: parseFloat(101 - wp.radius) });
     });
     console.log(beacons);
 

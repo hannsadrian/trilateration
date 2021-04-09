@@ -19,7 +19,8 @@
     "react-mapbox-gl": "^5.1.1",
     "react-scripts": "4.0.3",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "weighted-positioning": "^0.0.4"
   },
   "scripts": {
     "start": "craco start",
